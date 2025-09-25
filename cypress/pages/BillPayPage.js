@@ -1,0 +1,43 @@
+// cypress/pages/BillPayPage.js
+class BillPayPage {
+  elements = {
+    menu:         () => cy.contains('Bill Pay'),
+    payeeName:    () => cy.get('input[name="payee.name"]'),
+    address:      () => cy.get('input[name="payee.address.street"]'),
+    city:         () => cy.get('input[name="payee.address.city"]'),
+    state:        () => cy.get('input[name="payee.address.state"]'),
+    zip:          () => cy.get('input[name="payee.address.zipCode"]'),
+    phone:        () => cy.get('input[name="payee.phoneNumber"]'),
+    account:      () => cy.get('input[name="payee.accountNumber"]'),
+    verify:       () => cy.get('input[name="verifyAccount"]'),
+    amount:       () => cy.get('input[name="amount"]'),
+    from:         () => cy.get('select[name="fromAccountId"]'),
+    sendBtn:      () => cy.get('input[value="Send Payment"]'),
+    panel:        () => cy.get('#rightPanel'),
+    confirm:      () => cy.contains(/Bill Payment Complete/i)
+  };
+
+  open() {
+    this.elements.menu().click();
+    cy.location('pathname').should('include', 'billpay.htm');
+    this.elements.panel().should('contain', 'Payee Name');
+  }
+
+  fillPayee({ name, address, city, state, zip, phone, account, amount }) {
+    this.elements.payeeName().clear().type(name);
+    this.elements.address().clear().type(address);
+    this.elements.city().clear().type(city);
+    this.elements.state().clear().type(state);
+    this.elements.zip().clear().type(zip);
+    this.elements.phone().clear().type(phone);
+    this.elements.account().clear().type(account);
+    this.elements.verify().clear().type(account);
+    this.elements.amount().clear().type(amount);
+    this.elements.from().select(0);
+  }
+
+  submit() {
+    this.elements.sendBtn().click();
+  }
+}
+export default new BillPayPage();
