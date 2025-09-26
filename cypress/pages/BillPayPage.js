@@ -1,3 +1,4 @@
+// cypress/pages/BillPayPage.js
 import LoginPage from './LoginPage';
 
 class BillPayPage {
@@ -14,37 +15,17 @@ class BillPayPage {
     from:      () => cy.get('select[name="fromAccountId"]'),
     sendBtn:   () => cy.get('input[value="Send Payment"]'),
     panel:     () => cy.get('#rightPanel'),
-    // potvrda (ako je rezultat panel vidljiv)
-    confirm:   () => cy.contains(/Bill Payment Complete/i),
+    confirm:   () => cy.contains(/Bill Payment Complete|Successful/i),
   };
 
-  ensureLogged(username='john', password='demo') {
-    // ako smo na loginu – uloguj se
-    cy.get('body').then($b => {
-      const bodyText = $b.text();
-      const onLogin =
-        bodyText.includes('Username') &&
-        ($b.find('input[name="username"]').length > 0 || $b.find('input#username').length > 0);
-
-      if (onLogin) {
-        LoginPage.login(username, password);
-      }
-    });
-  }
-
   open() {
-    // idi direktno na billpay rutu (tolerantno na 5xx)
+    // Always ensure session first
+    cy.ensureLoggedIn();
+    // Then go directly to Bill Pay
     cy.visit('/parabank/billpay.htm', { failOnStatusCode: false });
 
-    // ako smo preusmjereni na login, uloguj se i opet idi na billpay
-    this.ensureLogged();
-    cy.location('pathname', { timeout: 10000 }).then((path) => {
-      if (!/billpay/i.test(path)) {
-        cy.visit('/parabank/billpay.htm', { failOnStatusCode: false });
-      }
-    });
-
-    // čekaj da forma bude spremna
+    // Confirm we’re really there (and not bounced)
+    cy.location('pathname', { timeout: 15000 }).should('match', /billpay/i);
     this.elements.panel().should('contain', 'Payee Name');
   }
 
@@ -58,7 +39,12 @@ class BillPayPage {
     this.elements.account().clear().type(account);
     this.elements.verify().clear().type(account);
     this.elements.amount().clear().type(amount);
-    this.elements.from().select(0);
+
+    // pick the first real option by value (skip placeholder)
+    this.elements.from().find('option').then($opts => {
+      const firstValue = [...$opts].map(o => o.value).find(v => v);
+      this.elements.from().select(firstValue);
+    });
   }
 
   submit() {

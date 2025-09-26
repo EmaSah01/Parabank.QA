@@ -18,12 +18,17 @@ Cypress.Commands.add('ensureLoggedIn', (u = Cypress.env('USER_NAME'), p = Cypres
   });
 });
 
-// keep your logout
+// cypress/support/commands.js
 Cypress.Commands.add('logoutUI', () => {
   cy.get('body', { timeout: 2000 }).then($b => {
-    if ($b.text().includes('Log Out')) cy.contains('Log Out').click({ force: true });
+    const hasLogout = /Log Out/i.test($b.text());
+    if (hasLogout) {
+      // use contains guarded by hasLogout, so it won’t retry/throw
+      cy.contains('a', 'Log Out', { matchCase: false }).click({ force: true });
+    }
   });
 });
+
 
 // 🔁 alias to keep old specs happy
 Cypress.Commands.add('loginUI', (u, p) => cy.ensureLoggedIn(u, p));
