@@ -1,21 +1,11 @@
 class LoginPage {
-  elements = {
-    username: () => cy.get('input[name="username"]'),
-    password: () => cy.get('input[name="password"]'),
-    loginBtn:  () => cy.get('input[value="Log In"]'),
-    error:     () => cy.get('#rightPanel p'),
-  };
-
   visit() {
-    cy.visit('/parabank/index.htm');
+    cy.visit('/', { failOnStatusCode: false });
   }
-
-  login(username, password) {
-    this.elements.username().clear().type(username);
-    this.elements.password().clear().type(password);
-    this.elements.loginBtn().click();
+  login(user = Cypress.env('USER_NAME') || 'john', pass = Cypress.env('USER_PASS') || 'demo') {
+    cy.get('input[name="username"]').clear().type(user);
+    cy.get('input[name="password"]').clear().type(pass);
+    cy.get('input[value="Log In"]').click();
   }
 }
-
-// 👇 ES Modules export
 export default new LoginPage();

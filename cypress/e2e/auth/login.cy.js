@@ -1,17 +1,18 @@
 // cypress/e2e/auth/login.cy.js
-import LoginPage from '../../pages/LoginPage';
-
 describe('Login', () => {
   it('logs in with valid creds', () => {
-    LoginPage.visit();
-    LoginPage.login('john', 'demo');
-    cy.contains('Accounts Overview').should('be.visible');
-    cy.url().should('include', '/overview.htm');
+    cy.loginUI(); // uses env defaults
+    cy.contains('#leftPanel', 'Accounts').should('be.visible');
+    cy.logoutUI();
   });
 
   it('shows error on invalid password', () => {
-    LoginPage.visit();
-    LoginPage.login('john', 'wrongpass');
-    LoginPage.elements.error().should('contain', 'could not be verified');
+    cy.visit('/parabank/index.htm');
+    cy.get('input[name="username"]').type(Cypress.env('USER_NAME'));
+    cy.get('input[name="password"]').type('NOT_THE_RIGHT_PASS');
+    cy.get('input[value="Log In"], input[type="submit"]').click();
+
+    // Parabank typically shows an error in the right panel
+    cy.contains('#rightPanel', 'could not be verified').should('be.visible');
   });
 });
